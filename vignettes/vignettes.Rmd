@@ -1,0 +1,52 @@
+---
+title: "Introduction to R function CCMO.na"
+author: "Yuang Tian"
+date: "2021/4/1"
+output: html_document
+---
+
+The R function _CCMO.na_ implements an powerful method for assessing disease-gene association using case-control mother-offspring data, which improves efficiency compared to the method proposed by R package _CCMO_ (refer to the reference) by incorpating missing genotypes.
+
+## 1 Data description
+
+The data for each mother-offspring pair are $(Y,G^c,G^m,X)$, where $Y$ is the disease status of the offspring (should be coded as 1 for case and 0 for control), $G^c$ and $G^m$ are the genotypes of offspring and mother, and $X$ is a $p$-vector of maternal covariates. 
+
+Suppose the targeted SNP has two alleles A and a (a is the minor allele), then genotypes can be coded either as 0 (for genotype AA), 1 (for genotype Aa), or 2 (for genotype aa).
+
+## 2. Model description
+
+The method assumes that the offspring genotype is conditionally independent of the maternal covariates given maternal covariates. The penetrance model is as follows:
+\begin{eqnarray*}
+&&\mbox{pr}(Y=1|G^m,G^c,X)\\
+&=&\mbox{expit}(\beta_0+\beta_{G^m}G^m+\beta_{G^c}G^c+\beta_{X}X+\beta_{G^mX}G^mX+\beta_{G^cX}G^cX),
+\end{eqnarray*}
+where expit$(t)=e^t/(1+e^t)$,  $\beta_{G^c}$ and $\beta_{G^m}$ are main genetic effects for offspring and mother, respectively, $\beta_X$ is the main maternal environmental effect, $\beta_{G^mX}$ is the maternal gene-environment interaction effect, $\beta_{G^cX}$ is the offspring gene-environment interaction effct. The maternal genotype is associated with the maternal covariates through the following double additive logit (daLOG) model:
+$$\mbox{pr}(G^m=k|X)=\frac{\xi_k(\theta)e^{k\eta'X}}{\sum_l\xi_l(\theta)e^{l\eta'X}},$$
+where $\eta$ is a regression parameter vector, $\xi_k(\theta)$ is the probability of $G^m=k$ with $\theta$ being the minor allele frequency. 
+
+## 3. Illustration of main function _CCMO.na_
+```{r,eval=FALSE}
+load(SampleData.rda)
+Y <- SampleData[,1]
+gm <- SampleData[,2]
+gc <- SampleData[,3]
+X <- SampleData[,4]
+f <- 0.01
+fit <- CCMO.na(Y,gm,gc,X,f)
+```
+The point estimation results are stored in
+```{r,eval=FALSE}
+fit$est
+```
+The estimated standard errors of the estimates are stored in
+```{r,eval=FALSE}
+fit$sd
+```
+The corresponding results by the standard logistic regression are included for comparison
+```{r,eval=FALSE}
+fit$est.log
+fit$sd.log
+```
+## 4. Reference
+
+Zhang H, Mukherjee B, Arthur V, Hu G, Hochner H, Chen J (2020). An Efficient and Computationally Robust Statistical Method for Analyzing Case-Control Mother-Offspring Pair Genetic Association Studies. *Annals of Applied Statistics* **14**: 560–-584.
