@@ -23,7 +23,7 @@ CCMO.na <- function(Y,gm,gc,X,f){
   sd.log = as.vector(res[,2])
   
   beta0 <- est.log
-  theta0 <- sqrt(sum(gm1 == 2)/length(gm1))
+  theta0 <- (2*sum(gm1 == 2)+sum(gm1 == 1))/(2*length(gm1))
   theta0 <- log(theta0/(1-theta0))
   eta0 <- 0
   para0 <- c(beta0,theta0,eta0)
