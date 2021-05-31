@@ -38,8 +38,9 @@ CCMO.na <- function(Y,gm,gc,Xo,Xm,Xc,Xgm,f){
   fit <- optim(par = para0,fn = llik,method = 'L-BFGS-B',hessian = TRUE)
   est <- fit$par #beta 6, theta 1, eta 1
   est <- c(est[1:nbeta],exp(est[nbeta+1])/(1 + exp(est[nbeta+1])),est[(nbeta+2):(nbeta+1+nXgm)])
-  sd <- sqrt(diag(solve(fit$hessian)))[1:nbeta]
-  return(list(est = est,sd = sd,est.log = est.log,sd.log = sd.log,logL = -fit$value))
+  Matv <- solve(fit$hessian)[1:nbeta,1:nbeta]
+  sd <- sqrt(diag(Matv))
+  return(list(est = est,sd = sd,Matv=Matv,est.log = est.log,sd.log = sd.log,logL = -fit$value))
 }
 
 likeli.ccmo <- function(para,Y,X,gm,gc,f,lambda,n,nX){
