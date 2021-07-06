@@ -3,12 +3,19 @@ CCMO.na <- function(Y,gm,gc,Xo,Xm,Xc,Xgm,f){
   n0 <- sum(Y == 0)
   n <- n1+n0
   lambda <- n1 / (n*f) - n0 / (n * (1-f))
+  fo = "~"
   nXo <- ifelse(is.null(Xo),0,max(1,ncol(Xo)))
+  if(!is.null(Xo)) fo = paste0(fo,"+Xo")
   nXm <- ifelse(is.null(Xm),0,max(1,ncol(Xm)))
+  if(!is.null(Xm)) fo = paste0(fo,"+Xm")
   nXc <- ifelse(is.null(Xc),0,max(1,ncol(Xc)))
+  if(!is.null(Xc)) fo = paste0(fo,"+Xc")
   nXgm <- ifelse(is.null(Xgm),0,max(1,ncol(Xgm)))
+  if(!is.null(Xgm)) fo = paste0(fo,"+Xgm")
   nbeta <- 3 + nXo + nXm + nXc
-  X <- cbind(Xo,Xm,Xc,Xgm)
+  #X <- cbind(Xo,Xm,Xc,Xgm)
+  fo = paste(fo,"-1")
+  X <- model.matrix(formula(fo))
   nX <- c(nXo,nXm,nXc,nXgm)
   
   group2 <- apply(is.na(cbind(gm,gc)),1,any)
@@ -37,7 +44,8 @@ CCMO.na <- function(Y,gm,gc,Xo,Xm,Xc,Xgm,f){
     -likeli.ccmo(para,Y1,X1,gm1,gc1,f,lambda,n,nX) - likeli.ccmo.na(para,Y2,X2,gm2,gc2,f,lambda,n,nX)
   fit <- optim(par = para0,fn = llik,method = 'L-BFGS-B',hessian = TRUE)
   est <- fit$par #beta 6, theta 1, eta 1
-  est <- c(est[1:nbeta],exp(est[nbeta+1])/(1 + exp(est[nbeta+1])),est[(nbeta+2):(nbeta+1+nXgm)])
+  if(nXgm>0) est <- c(est[1:nbeta],exp(est[nbeta+1])/(1 + exp(est[nbeta+1])),est[(nbeta+2):(nbeta+1+nXgm)])
+  else est <- c(est[1:nbeta],exp(est[nbeta+1])/(1 + exp(est[nbeta+1])))
   Matv <- solve(fit$hessian)[1:nbeta,1:nbeta]
   sd <- sqrt(diag(Matv))
   return(list(est = est,sd = sd,Matv=Matv,est.log = est.log,sd.log = sd.log,logL = -fit$value))
