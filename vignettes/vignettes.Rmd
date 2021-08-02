@@ -2,7 +2,9 @@
 title: "Introduction to R function CCMO.na"
 author: "Yuang Tian"
 date: "2021/4/1"
-output: html_document
+output:
+  pdf_document: default
+  html_document: default
 ---
 
 The R function _CCMO.na_ implements an powerful method for assessing disease-gene association using case-control mother-offspring data, which improves efficiency compared to the method proposed by R package _CCMO_ (refer to the reference) by incorpating missing genotypes.
@@ -21,8 +23,8 @@ The method assumes that the offspring genotype is conditionally independent of t
 &=&\mbox{expit}(\beta_0+\beta_{G^m}G^m+\beta_{G^c}G^c+\beta_{X}X_o+\beta_{G^mX}G^mX_m+\beta_{G^cX}G^cX_c),
 \end{eqnarray*}
 where expit$(t)=e^t/(1+e^t)$,$X_o$,$X_c$, and $X_m$ are functions of the covariates $X$,  $\beta_{G^c}$ and $\beta_{G^m}$ are main genetic effects for offspring and mother, respectively, $\beta_X$ is the main maternal environmental effect, $\beta_{G^mX}$ is the maternal gene-environment interaction effect, $\beta_{G^cX}$ is the offspring gene-environment interaction effct. The maternal genotype is associated with the maternal covariates through the following double additive logit (daLOG) model:
-$$\mbox{pr}(G^m=k|X)=\frac{\xi_k(\theta)e^{k\eta'X_{G^m}}}{\sum_l\xi_l(\theta)e^{l\eta'X_{G^m}}},$$
-where $\eta$ is a regression parameter vector,$X_{G^m}$ is a function of $X$, $\xi_k(\theta)$ is the probability of $G^m=k$ with $\theta$ being the minor allele frequency. 
+$$\mbox{pr}(G^m=k|X)=\frac{\xi_k(\theta,F)e^{k\eta'X_{G^m}}}{\sum_l\xi_l(\theta,F)e^{l\eta'X_{G^m}}},$$
+where $\eta$ is a regression parameter vector,$X_{G^m}$ is a function of $X$, $\xi_k(\theta,F)$ is the probability of $G^m=k$ given the minor allele frequency $\theta$ and fixation index parameter $F$ (more details refer to the reference). 
 
 ## 3. Illustration of main function _CCMO.na_
 ```{r,eval=FALSE}
