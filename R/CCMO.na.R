@@ -1,4 +1,4 @@
-CCMO.na <- function(Y,gm,gc,Xo,Xm,Xc,Xgm,f){
+CCMO.na <- function(Y,gm,gc,Xo,Xm,Xc,Xgm,f,HWE){
   n1 <- sum(Y == 1)
   n0 <- sum(Y == 0)
   n <- n1+n0
@@ -33,22 +33,45 @@ CCMO.na <- function(Y,gm,gc,Xo,Xm,Xc,Xgm,f){
   est.log <- as.vector(res[,1])
   sd.log <- as.vector(res[,2])
   
-  beta0 <- est.log
-  theta0 <- (2*sum(gm1 == 2)+sum(gm1 == 1))/(2*length(gm1))
-  theta0 <- log(theta0/(1-theta0))
-  eta0 <- rep(0,nXgm)
-  F0 <- 0.1
-  F0 <- log(F0/(1-F0))
-  para0 <- c(beta0,theta0,eta0,F0)
+  if(HWE == TRUE){
+    beta0 <- est.log
+    theta0 <- (2*sum(gm1 == 2)+sum(gm1 == 1))/(2*length(gm1))
+    theta0 <- log(theta0/(1-theta0))
+    eta0 <- rep(0,nXgm)
+    para0 <- c(beta0,theta0,eta0)
+    
+    llik <- function(para)
+      -likeli.ccmo(c(para,-Inf),Y1,X1,gm1,gc1,f,lambda,n,nX) - likeli.ccmo.na(c(para,-Inf),Y2,X2,gm2,gc2,f,lambda,n,nX)
+    fit <- optim(par = para0,fn = llik,method = 'L-BFGS-B',hessian = TRUE)
+    est <- fit$par #beta 6, theta 1, eta 1, F 1
+    if(nXgm>0)
+      est <- c(est[1:nbeta],exp(est[nbeta+1])/(1 + exp(est[nbeta+1])),est[(nbeta+2):(nbeta+1+nXgm)])
+    else 
+      est <- c(est[1:nbeta],exp(est[nbeta+1])/(1 + exp(est[nbeta+1])))
+    Matv <- solve(fit$hessian)[1:nbeta,1:nbeta]
+    sd <- sqrt(diag(Matv))
+  }
   
-  llik <- function(para)
-    -likeli.ccmo(para,Y1,X1,gm1,gc1,f,lambda,n,nX) - likeli.ccmo.na(para,Y2,X2,gm2,gc2,f,lambda,n,nX)
-  fit <- optim(par = para0,fn = llik,method = 'L-BFGS-B',hessian = TRUE)
-  est <- fit$par #beta 6, theta 1, eta 1, F 1
-  if(nXgm>0) est <- c(est[1:nbeta],exp(est[nbeta+1])/(1 + exp(est[nbeta+1])),est[(nbeta+2):(nbeta+1+nXgm)],exp(est[length(est)])/(1 + exp(est[length(est)])))
-  else est <- c(est[1:nbeta],exp(est[nbeta+1])/(1 + exp(est[nbeta+1])),exp(est[length(est)])/(1 + exp(est[length(est)])))
-  Matv <- solve(fit$hessian)[1:nbeta,1:nbeta]
-  sd <- sqrt(diag(Matv))
+  if(HWE == FALSE){
+    beta0 <- est.log
+    theta0 <- (2*sum(gm1 == 2)+sum(gm1 == 1))/(2*length(gm1))
+    theta0 <- log(theta0/(1-theta0))
+    eta0 <- rep(0,nXgm)
+    F0 <- 0.1
+    F0 <- log(F0/(1-F0))
+    para0 <- c(beta0,theta0,eta0,F0)
+  
+    llik <- function(para)
+      -likeli.ccmo(para,Y1,X1,gm1,gc1,f,lambda,n,nX) - likeli.ccmo.na(para,Y2,X2,gm2,gc2,f,lambda,n,nX)
+    fit <- optim(par = para0,fn = llik,method = 'L-BFGS-B',hessian = TRUE)
+    est <- fit$par #beta 6, theta 1, eta 1, F 1
+    if(nXgm>0) 
+      est <- c(est[1:nbeta],exp(est[nbeta+1])/(1 + exp(est[nbeta+1])),est[(nbeta+2):(nbeta+1+nXgm)],exp(est[length(est)])/(1 + exp(est[length(est)])))
+    else 
+      est <- c(est[1:nbeta],exp(est[nbeta+1])/(1 + exp(est[nbeta+1])),exp(est[length(est)])/(1 + exp(est[length(est)])))
+    Matv <- solve(fit$hessian)[1:nbeta,1:nbeta]
+    sd <- sqrt(diag(Matv))
+  }
   return(list(est = est,sd = sd,Matv = Matv,est.log = est.log,sd.log = sd.log,logL = -fit$value))
 }
 
