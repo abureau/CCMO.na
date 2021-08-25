@@ -1,5 +1,5 @@
 ---
-title: "Introduction to R function CCMO.na"
+title: "Introduction to R function CCMO.dep"
 author: "Yuang Tian"
 date: "2021/4/1"
 output:
@@ -7,7 +7,7 @@ output:
   html_document: default
 ---
 
-The R function _CCMO.na_ implements an powerful method for assessing disease-gene association using case-control mother-offspring data, which improves efficiency compared to the method proposed by R package _CCMO_ (refer to the reference) by incorpating missing genotypes.
+The R function _CCMO.dep_ implements an powerful method for assessing disease-gene association using case-control mother-offspring data, which improves efficiency compared to the method proposed by R package _CCMO_ (refer to the reference) by incorpating missing genotypes.
 
 ## 1 Data description
 
@@ -26,17 +26,17 @@ where expit$(t)=e^t/(1+e^t)$,$X_o$,$X_c$, and $X_m$ are functions of the covaria
 $$\mbox{pr}(G^m=k|X)=\frac{\xi_k(\theta,F)e^{k\eta'X_{G^m}}}{\sum_l\xi_l(\theta,F)e^{l\eta'X_{G^m}}},$$
 where $\eta$ is a regression parameter vector,$X_{G^m}$ is a function of $X$, $\xi_k(\theta,F)$ is the probability of $G^m=k$ given the minor allele frequency $\theta$ and fixation index parameter $F$ (more details refer to the reference). 
 
-## 3. Usage of main function _CCMO.na_
+## 3. Usage of main function _CCMO.dep_
 
-The usage of the function _CCMO.na_ is as follows:
+The usage of the function _CCMO.dep_ is as follows:
 
 ```{r,eval=FALSE}
-CCMO.na(Y,gm,gc,Xo,Xm,Xc,Xgm,f,HWE)
+CCMO.dep(Y,gm,gc,Xo,Xm,Xc,Xgm,f,HWE)
 ```
 
 Users should specify the prevalence _f_, and make sure that the genotypes are coded as 0 (for genotype AA), 1 (for genotype Aa), or 2 (for genotype aa). Users should specify _HWE_ to choose the model they prefer to use ( _TRUE_ for model with Hardy-Weinberg equilibrium and _FALSE_ for model without Hardy-Weinberg equilibrium).
 
-## 4. Illustration of main function _CCMO.na_
+## 4. Illustration of main function _CCMO.dep_
 ```{r,eval=FALSE}
 load(SampleData.rda)
 Y <- SampleData[,1]
@@ -48,7 +48,7 @@ Xm <- X[,1]
 Xc <- X[,1]
 Xgm <- X
 f <- 0.01
-fit <- CCMO.na(Y,gm,gc,Xo,Xm,Xc,Xgm,f,TRUE)
+fit <- CCMO.dep(Y,gm,gc,Xo,Xm,Xc,Xgm,f,TRUE)
 ```
 The point estimation results are stored in
 ```{r,eval=FALSE}
