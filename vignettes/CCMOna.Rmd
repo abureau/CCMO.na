@@ -1,13 +1,17 @@
 ---
-title: "Introduction to R function CCMO.na"
+title: "Introduction to R function _CCMO.na_"
 author: "Yuang Tian"
-date: "2021/4/1"
+date: "2021/8/25"
 output:
   pdf_document: default
   html_document: default
 ---
 
-The R function _CCMO.na_ implements an powerful method for assessing disease-gene association using case-control mother-offspring data, which improves efficiency compared to the method proposed by R package _CCMO_ (refer to the reference) by incorpating missing genotypes.
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+The R function _CCMO.na_ implements a robust method for assessing disease-gene association using case-control mother-offspring data. Compared to the method proposed by R package _CCMO_ (refer to the reference), _CCMO.na_ no longer assumes a double additive logit model between $G^m$ and $X$ in order to improve robustness. Furthermore, _CCMO.na_ improves efficiency by incorpating missing genotypes of offspring.
 
 ## 1 Data description
 
@@ -22,19 +26,17 @@ The method assumes that the offspring genotype is conditionally independent of t
 &&\mbox{pr}(Y=1|G^m,G^c,X)\\
 &=&\mbox{expit}(\beta_0+\beta_{G^m}G^m+\beta_{G^c}G^c+\beta_{X}X_o+\beta_{G^mX}G^mX_m+\beta_{G^cX}G^cX_c),
 \end{eqnarray*}
-where expit$(t)=e^t/(1+e^t)$,$X_o$,$X_c$, and $X_m$ are functions of the covariates $X$,  $\beta_{G^c}$ and $\beta_{G^m}$ are main genetic effects for offspring and mother, respectively, $\beta_X$ is the main maternal environmental effect, $\beta_{G^mX}$ is the maternal gene-environment interaction effect, $\beta_{G^cX}$ is the offspring gene-environment interaction effct. The maternal genotype is associated with the maternal covariates through the following double additive logit (daLOG) model:
-$$\mbox{pr}(G^m=k|X)=\frac{\xi_k(\theta,F)e^{k\eta'X_{G^m}}}{\sum_l\xi_l(\theta,F)e^{l\eta'X_{G^m}}},$$
-where $\eta$ is a regression parameter vector,$X_{G^m}$ is a function of $X$, $\xi_k(\theta,F)$ is the probability of $G^m=k$ given the minor allele frequency $\theta$ and fixation index parameter $F$ (more details refer to the reference). 
+where expit$(t)=e^t/(1+e^t)$,$X_o$,$X_c$, and $X_m$ are functions of the covariates $X$,  $\beta_{G^c}$ and $\beta_{G^m}$ are main genetic effects for offspring and mother, respectively, $\beta_X$ is the main maternal environmental effect, $\beta_{G^mX}$ is the maternal gene-environment interaction effect, $\beta_{G^cX}$ is the offspring gene-environment interaction effct. We do not assume any model between $G^m$ and $X$, and treat the joint distribution of $(G^m,X^{\tau})^{\tau}$ to be totally nonparametric.
 
 ## 3. Usage of main function _CCMO.na_
 
 The usage of the function _CCMO.na_ is as follows:
 
 ```{r,eval=FALSE}
-CCMO.na(Y,gm,gc,Xo,Xm,Xc,Xgm,f,HWE)
+CCMO.na(Y,gm,gc,Xo,Xm,Xc,f,ind)
 ```
 
-Users should specify the prevalence _f_, and make sure that the genotypes are coded as 0 (for genotype AA), 1 (for genotype Aa), or 2 (for genotype aa). Users should specify _HWE_ to choose the model they prefer to use ( _TRUE_ for model with Hardy-Weinberg equilibrium and _FALSE_ for model without Hardy-Weinberg equilibrium).
+Users should specify the prevalence _f_, and make sure that the genotypes are coded as 0 (for genotype AA), 1 (for genotype Aa), or 2 (for genotype aa). Users should specify _ind_ to choose the model they prefer to use ( _TRUE_ for model with independent assumption between $G^m$ and $X$ and _FALSE_ for model without independent assumption between $G^m$ and $X$). Note that only $G^c$ is allowed to contain missing data. 
 
 ## 4. Illustration of main function _CCMO.na_
 ```{r,eval=FALSE}
@@ -46,9 +48,8 @@ X <- SampleData[,4:5]
 Xo <- X
 Xm <- X[,1]
 Xc <- X[,1]
-Xgm <- X
 f <- 0.01
-fit <- CCMO.na(Y,gm,gc,Xo,Xm,Xc,Xgm,f,TRUE)
+fit <- CCMO.na(Y,gm,gc,Xo,Xm,Xc,f,FALSE)
 ```
 The point estimation results are stored in
 ```{r,eval=FALSE}
