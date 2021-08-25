@@ -1,5 +1,5 @@
 ---
-title: "Introduction to R function CCMO.dep"
+title: "Introduction to R function _CCMO.dep_"
 author: "Yuang Tian"
 date: "2021/4/1"
 output:
