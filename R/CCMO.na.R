@@ -1,8 +1,4 @@
 CCMO.na <- function(Y,gm,gc,Xo,Xm,Xc,f,ind){
-  n1 <- sum(Y == 1)
-  n0 <- sum(Y == 0)
-  n <- n1+n0
-  lambda <- n1 / (n*f) - n0 / (n * (1-f))
   fo = "~"
   nXo <- ifelse(is.null(Xo),0,max(1,ncol(Xo)))
   if(!is.null(Xo)) fo = paste0(fo,"+Xo")
@@ -15,15 +11,26 @@ CCMO.na <- function(Y,gm,gc,Xo,Xm,Xc,f,ind){
   X <- model.matrix(formula(fo))
   nX <- c(nXo,nXm,nXc)
   
-  group2 <- apply(is.na(cbind(gm,gc)),1,any)
-  X1 <- as.matrix(X[!group2,])
-  Y1 <- Y[!group2]
-  gm1 <- gm[!group2]
-  gc1 <- gc[!group2]
-  X2 <- as.matrix(X[group2,])
-  Y2 <- Y[group2]
-  gm2 <- gm[group2]
-  gc2 <- gc[group2]
+  keep <- !is.na(gm)
+  Xt <- as.matrix(X[keep,])
+  Yt <- Y[keep]
+  gmt <- gm[keep]
+  gct <- gc[keep]
+  
+  n1 <- sum(Yt == 1)
+  n0 <- sum(Yt == 0)
+  n <- n1+n0
+  lambda <- n1 / (n*f) - n0 / (n * (1-f))
+  
+  group2 <- is.na(gct)
+  X1 <- as.matrix(Xt[!group2,])
+  Y1 <- Yt[!group2]
+  gm1 <- gmt[!group2]
+  gc1 <- gct[!group2]
+  X2 <- as.matrix(Xt[group2,])
+  Y2 <- Yt[group2]
+  gm2 <- gmt[group2]
+  gc2 <- gct[group2]
   
   Z <- cbind(1,gm1,gc1,X1[,1:nXo],gm1*X1[,(nXo+1):(nXo+nXm)],gc1*X1[,(nXo+nXm+1):(nXo+nXm+nXc)])
   fit <- glm(Y1 ~ 0 + Z,family = binomial)
